@@ -1,0 +1,14 @@
+.ColorBackground {
+    background-color:black;
+    min-height: 20vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .ColorBackground h2{
+    color: white;
+    padding: 15px;
+    font-size: 3rem;
+  }
