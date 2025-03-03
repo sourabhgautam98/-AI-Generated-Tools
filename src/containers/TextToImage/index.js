@@ -7,6 +7,8 @@ import {
   InputGroup,
   FormControl,
   Button,
+  Navbar,
+  Nav,
 } from "react-bootstrap";
 import { IMAGE_API_KEY } from "@/utils/constants";
 import styles from "./TextToImage.module.css";
@@ -51,59 +53,80 @@ const TextToImage = () => {
   };
 
   return (
-    <Container className={styles.ColorBackground}>
-      <h2>Ai Generator Image</h2>
-      <InputGroup className="mb-3">
-        <FormControl
-          type="text"
-          placeholder="Write Prompt..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <Button
-          variant="primary"
-          onClick={() => query(text)}
-          disabled={!text || loading}
-        >
-          {loading ? "Generating..." : "Image Generate "}
-        </Button>
-      </InputGroup>
+    <>
+      {/* Navbar */}
+      <Navbar bg="light" expand="lg" className="mb-4 shadow-sm">
+        <Container>
+          <Navbar.Brand href="/" className="fw-bold">
+            AI Tools
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link href="/textToSpeech">Text to Speech</Nav.Link>
+              <Nav.Link href="/BackgroundRemover">Background Removal</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      {loading && (
-        <div className="d-flex flex-column align-items-center justify-content-center mt-3">
-          <Spinner animation="grow" variant="primary" />
-          <p className="mt-2" style={{ color: "White" }}>Image Generating, please wait...</p>
-        </div>
-      )}
+      {/* Main Container */}
+      <Container className={styles.ColorBackground}>
+        <h2>Ai Generator Image</h2>
+        <InputGroup className="mb-3">
+          <FormControl
+            type="text"
+            placeholder="Write Prompt..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <Button
+            variant="primary"
+            onClick={() => query(text)}
+            disabled={!text || loading}
+            className={styles.customBtn}
+          >
+            {loading ? "Generating..." : "Image Generate "}
+          </Button>
+        </InputGroup>
 
-      {error && <p className="text-danger">{error}</p>}
-
-      {image && !loading ? (
-        <>
-          {/* <ViewImage /> */}
-          <div className="text-center mt-3">
-            <h5 style={{ color: "White" }}>Generated Image:</h5>
-            <img
-              src={image}
-              alt="Generated result"
-              style={{ width: "60%", height: "auto" }}
-              className="img-fluid mb-3"
-            />
-            <div>
-              <a
-                href={image}
-                download="generated-image.png"
-                className="btn btn-success"
-              >
-                Download Image
-              </a>
-            </div>
+        {loading && (
+          <div className="d-flex flex-column align-items-center justify-content-center mt-3">
+            <Spinner animation="grow" variant="primary" />
+            <p className="mt-2" style={{ color: "White" }}>
+              Image Generating, please wait...
+            </p>
           </div>
-        </>
-      ) : (
-        <ViewImage />
-      )}
-    </Container>
+        )}
+
+        {error && <p className="text-danger">{error}</p>}
+
+        {image && !loading ? (
+          <>
+            <div className="text-center mt-3">
+              <h5 style={{ color: "White" }}>Generated Image:</h5>
+              <img
+                src={image}
+                alt="Generated result"
+                style={{ width: "60%", height: "auto" }}
+                className="img-fluid mb-3"
+              />
+              <div>
+                <a
+                  href={image}
+                  download="generated-image.png"
+                  className={`btn btn-success ${styles.customBtn}`}
+                >
+                  Download Image
+                </a>
+              </div>
+            </div>
+          </>
+        ) : (
+          <ViewImage />
+        )}
+      </Container>
+    </>
   );
 };
 

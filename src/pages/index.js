@@ -1,9 +1,17 @@
 import Dashboard from "@/containers/Dashboard";
 
+
 export default function Home() {
   return (
-    <main>
-      
+    <main
+      style={{
+       
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "80vh",
+      }}
+    >
       <Dashboard />
     </main>
   );

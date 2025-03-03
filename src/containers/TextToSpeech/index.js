@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Navbar, Nav } from "react-bootstrap";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { SPEECH_API_KEY } from "@/utils/constants";
-import "./TextToSpeech.module.css"
+import styles from "./TextToSpeech.module.css"; // Import the CSS module
 
 export default function TextToSpeech() {
   const [text, setText] = useState("");
@@ -44,65 +44,65 @@ export default function TextToSpeech() {
   };
 
   return (
-    <Container
-      className="mt-5"
-      style={{
-        maxWidth: "800px",
-        borderRadius: "10px",
-        padding: "15px",
-      }}
-    >
-      <h2
-        className="mb-4 text-center"
-        style={{ color: "white", background: "none", fontSize: "3rem" }}
-      >
-        Text to Speech Converter
-      </h2>
-      <Form
-        style={{ padding: "10px", borderRadius: "10px", background: "none" }}
-      >
-        <Form.Group controlId="textInput" className="mb-4">
-          <Form.Control
-            as="textarea"
-            rows={12}
-            placeholder="Enter the Text..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            style={{
-              fontSize: "1.1rem",
-              padding: "15px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              color: "white",
-              background: "rgba(255, 255, 255, 0.1)",
-            }}
-          
-          />
-        </Form.Group>
-        <div className="d-grid" style={{ background: "none" }}>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleConvert}
-            disabled={loading}
-            style={{
-              fontSize: "1.2rem",
-              padding: "10px",
-              background: "rgba(0, 123, 255, 0.8)",
-              border: "none",
-            }}
-          >
-            {loading ? "Converting..." : "Convert to Speech"}
-          </Button>
-        </div>
-      </Form>
-      {audioUrl && (
-        <div className="mt-5 text-center">
-          <audio controls style={{ width: "100%" }}>
-            <source src={audioUrl} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
-    </Container>
+    <>
+      {/* Navbar */}
+      <Navbar bg="light" expand="lg" className="mb-4 shadow-sm">
+        <Container>
+          <Navbar.Brand href="/" className="fw-bold">
+            AI Tools
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link href="/textToimage">Text to Image</Nav.Link>
+              <Nav.Link href="/BackgroundRemover">Background Removal</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      {/* Main Container */}
+      <Container className={styles.container}>
+        <h2 className={`${styles.title} mb-4 text-center`}>
+          Text to Speech Converter
+        </h2>
+        <Form className={styles.form}>
+          <Form.Group controlId="textInput" className="mb-4">
+            <Form.Control
+              as="textarea"
+              rows={12}
+              placeholder="Enter the Text..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className={styles.textarea}
+            />
+          </Form.Group>
+          <div className="d-grid">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleConvert}
+              disabled={loading}
+              className={styles.customBtn}
+              style={{
+                fontSize: "1.2rem",
+                padding: "10px",
+                border: "none",
+              }}
+            >
+              {loading ? "Converting..." : "Convert to Speech"}
+            </Button>
+          </div>
+        </Form>
+        {audioUrl && (
+          <div className="mt-5 text-center">
+            <audio controls style={{ width: "100%" }}>
+              <source src={audioUrl} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        )}
+      </Container>
+    </>
   );
 }

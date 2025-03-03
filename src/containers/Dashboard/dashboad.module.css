@@ -1,0 +1,22 @@
+/* dashboard.module.css */
+.customBtn {
+  transition: all 0.5s ease;
+}
+
+.customBtn:hover {
+  background-color: #252525;
+  transform: scale(1.05);
+}
+
+
+
+
+.cardImg {
+  transition: transform 0.3s ease;
+  border-radius: 15px;
+  padding: 10px;
+}
+
+.cardImg:hover {
+  transform: scale(1.05);
+}

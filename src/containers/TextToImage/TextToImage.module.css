@@ -1,5 +1,5 @@
 .ColorBackground {
-    background-color:black;
+  
     min-height: 20vh;
     display: flex;
     flex-direction: column;
@@ -8,7 +8,24 @@
   }
   
   .ColorBackground h2{
-    color: white;
+    color: rgb(0, 0, 0);
     padding: 15px;
     font-size: 3rem;
   }
+
+.ColorBackground {
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.customBtn {
+  transition: all 0.5s ease;
+}
+
+.customBtn:hover {
+  background-color: #252525;
+  transform: scale(1.05);
+}
+.formControl {
+  flex: 1; /* Makes the input take available space */
+}
