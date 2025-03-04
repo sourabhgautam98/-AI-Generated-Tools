@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Container,
@@ -11,19 +11,28 @@ import {
   Alert,
   Navbar,
   Nav,
+  Card,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { SPEECH_API_KEY } from "@/utils/constants";
 import styles from "./BackgroundRemover.module.css";
+import { REMOVER_API_KEY } from "@/utils/constants";
 
 export default function BackgroundRemover() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [outputImage, setOutputImage] = useState(null);
   const [error, setError] = useState(null);
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+    } else {
+      setPreviewImage(null);
+    }
   };
 
   const handleUpload = async () => {
@@ -35,42 +44,66 @@ export default function BackgroundRemover() {
     setLoading(true);
     setError(null);
 
-    console.log("SPEECH_API_KEY:", SPEECH_API_KEY);
-
     const formData = new FormData();
-    formData.append("image", selectedFile);
-
-    const options = {
-      method: "POST",
-      url: "https://background-removal.p.rapidapi.com/remove",
-      headers: {
-        "x-rapidapi-key": SPEECH_API_KEY,
-        "x-rapidapi-host": "background-removal.p.rapidapi.com",
-      },
-      data: formData,
-    };
+    formData.append("image_file", selectedFile);
+    formData.append("size", "auto");
 
     try {
-      const response = await axios.request(options);
-      console.log("API Response:", response.data);
-      if (response.data?.response?.image_url) {
-        setOutputImage(response.data.response.image_url);
-      } else if (response.data?.image_url) {
-        setOutputImage(response.data.image_url);
-      } else {
-        throw new Error("Unexpected API response format");
-      }
+      const response = await axios.post(
+        "https://api.remove.bg/v1.0/removebg",
+        formData,
+        {
+          headers: {
+            "X-Api-Key": REMOVER_API_KEY,
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "arraybuffer",
+        }
+      );
+
+      const base64Image = Buffer.from(response.data, "binary").toString("base64");
+      const imageUrl = `data:image/png;base64,${base64Image}`;
+      setOutputImage(imageUrl);
     } catch (err) {
       console.error("API Error:", err);
-      setError(err.response?.data?.message || "Failed to remove background. Try again.");
+      setError(
+        err.response?.data?.errors?.[0]?.title ||
+          "Failed to remove background. Try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDownload = () => {
+    if (outputImage) {
+      const link = document.createElement("a");
+      link.href = outputImage;
+      link.download = "background_removed_image.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
+
+  const imageStyle = {
+    maxHeight: "300px",
+    maxWidth: "100%",
+    objectFit: "contain",
+    width: "auto",
+    height: "auto",
+  };
+
   return (
     <>
-      {/* Navbar */}
       <Navbar bg="light" expand="lg" className="mb-4 shadow-sm">
         <Container>
           <Navbar.Brand href="/" className="fw-bold">
@@ -86,41 +119,87 @@ export default function BackgroundRemover() {
         </Container>
       </Navbar>
 
-      {/* Main Container */}
       <Container className={styles.container}>
         <h2 className={styles.title}>Background Remover</h2>
-        <Form.Group controlId="formFile" className={styles.formGroup}>
-          <Form.Label className={styles.label}>
-            Select an image
-          </Form.Label>
+        
+        <Form.Group controlId="formFile" className={`${styles.formGroup} mb-4`}>
+          <Form.Label>Select an image to process</Form.Label>
           <Form.Control
             type="file"
             accept="image/*"
             onChange={handleFileChange}
           />
         </Form.Group>
-        <Button
-          variant="primary"
-          onClick={handleUpload}
-          disabled={loading}
-          className={styles.customBtn}
-        >
-          {loading ? (
-            <Spinner animation="border" size="sm" />
-          ) : (
-            "Remove Background"
-          )}
-        </Button>
+
+        <div className="row justify-content-center">
+          {/* Input Preview Box */}
+          <div className="col-md-5 mb-4">
+            <Card className="h-100 shadow">
+              <Card.Body>
+                <Card.Title>Original Image</Card.Title>
+                {previewImage ? (
+                  <div className="mt-3 text-center">
+                    <Image 
+                      src={previewImage} 
+                      style={imageStyle}
+                      alt="Preview"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center text-muted py-5">
+                    Upload an image to see preview
+                  </div>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={handleUpload}
+                  disabled={loading || !selectedFile}
+                  className={`${styles.customBtn} mt-3 w-100`}
+                >
+                  {loading ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    "Remove Background"
+                  )}
+                </Button>
+              </Card.Body>
+            </Card>
+          </div>
+
+          {/* Output Box */}
+          <div className="col-md-5 mb-4">
+            <Card className="h-100 shadow">
+              <Card.Body>
+                <Card.Title>Output Image</Card.Title>
+                {outputImage ? (
+                  <div className="text-center">
+                    <Image 
+                      src={outputImage} 
+                      style={imageStyle}
+                      alt="Processed"
+                    />
+                    <Button
+                      variant="success"
+                      onClick={handleDownload}
+                      className={`${styles.customBtn} mt-3 w-100`} // Changed to use customBtn
+                    >
+                      Download Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center text-muted py-5">
+                    Processed image will appear here
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          </div>
+        </div>
+
         {error && (
           <Alert variant="danger" className="mt-3">
             {error}
           </Alert>
-        )}
-        {outputImage && (
-          <div className={styles.outputSection}>
-            <h5 style={{ color: "white" }}>Processed Image:</h5>
-            <Image src={outputImage} fluid />
-          </div>
         )}
       </Container>
     </>
